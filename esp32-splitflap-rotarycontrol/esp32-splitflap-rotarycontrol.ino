@@ -29,8 +29,6 @@
 const int MOTOR_INCREMENT = 30;
 const int MOTOR_STEP_TIMER = 950;
 
-volatile long motorMoveDistance = 0;
-
 RotaryEncoder *encoder = nullptr;
 
 //WIFI
@@ -39,6 +37,10 @@ const char* password = "wifipassword";
 
 AsyncWebServer server(80);
 AsyncWebSocket ws("/ws");
+
+volatile long motorMoveDistance = 0;
+bool motorGoingHome = false;
+long motorDestination = 0;
 
 hw_timer_t *Motor_timer = NULL;
 void IRAM_ATTR runMotor(){
@@ -88,6 +90,13 @@ static void hallHandler(uint8_t btnId, uint8_t btnState) {
   if (btnState == BTN_PRESSED) {
     Serial.println("Hall Sensor!");
     ws.textAll("Hall Sensor!");
+    if(motorGoingHome){
+      motorMoveDistance=0;
+      motorGoingHome=false;
+      ws.textAll("Motor is Home!");
+      motorMoveDistance = motorDestination;
+      motorDestination = 0;
+    }
   } else {
     ws.textAll("Released Hall Sensor!");
     Serial.println("Released Hall Sensor!");
@@ -150,30 +159,28 @@ void handleClientJsonData(String data){
       motorspeed3();
       return;
     }
+    if(cmdString == "motorhome"){
+      motorhome(0);
+      return;
+    }
+    if(cmdString == "devil"){
+      motorhome(540);
+      return;
+    }
     
-    /*
-    if(cmdString == "targetUp"){
+    
+    if(cmdString == "goto"){
       JsonVariant jsonValue = decodedJson["value"];
       if (jsonValue.isNull()){
-        Serial.println("targetUp value not found");
+        Serial.println("goto value not found");
         return;
       }
-      if(jsonValue.as<String>() == "all"){
-        Serial.println("command targetUp = all");
-        putAllTargetsUp();
-        return;
-      }else{
-       int targetNo = jsonValue.as<unsigned int>();
-       if(targetNo == 0 || targetNo > 6){
-        Serial.print("command targetUp value invalid");
-        return;
-        }
-        Serial.print("command targetUp = ");
-        Serial.println(targetNo);
-        allTargets[targetNo-1].servoResetCounter = 4;
-      }
+      int destinationValue = jsonValue.as<unsigned int>();
+      Serial.print("goto ");
+      Serial.println(destinationValue);
+      motorhome(destinationValue);
+      return;
     }
-    */
 }
 
 
@@ -331,6 +338,10 @@ void motorspeed2( ) {
 void motorspeed3( ) {
   timerAlarmWrite(Motor_timer, MOTOR_STEP_TIMER - 100, true);
 }
+void motorhome(long destination) {
+  motorDestination=destination;
+  motorGoingHome=true;
+}
 void InitOta( ) {
 
   // Port defaults to 3232
@@ -386,7 +397,11 @@ void loop() {
   myButton.update(digitalRead(ROTARY_ENCODER_BUTTON_PIN));
   static int pos = 0;
   encoder->tick();
-
+  
+  if(motorGoingHome){
+    motorMoveDistance = 100;
+  }
+  
   int newPos = encoder->getPosition();
   if (pos != newPos && newPos != 0) {
     RotaryEncoder::Direction dir = encoder->getDirection();

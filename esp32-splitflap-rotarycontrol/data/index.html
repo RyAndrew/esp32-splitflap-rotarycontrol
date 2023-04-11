@@ -24,7 +24,14 @@
       padding:0;
       padding-left:4px;
     }
+    input#gotovalue {
+      border: 2px solid black;
+      border-radius: 8px;
+      height: 35px;
+      width: 100px;
+      font-size: 1.35em;
 
+    }
     #input_el {
       width:98%;
       border: 2px solid black;
@@ -144,9 +151,14 @@
     ge("motorspeed1").onclick = function(){ socketSend({cmd:"motorspeed1"}) }
     ge("motorspeed2").onclick = function(){ socketSend({cmd:"motorspeed2"}) }
     ge("motorspeed3").onclick = function(){ socketSend({cmd:"motorspeed3"}) }
+
     ge("motorstep10").onclick = function(){ socketSend({cmd:"motorstep10"}) }
     ge("motorstep20").onclick = function(){ socketSend({cmd:"motorstep20"}) }
+
     ge("motorhome").onclick = function(){ socketSend({cmd:"motorhome"}) }
+
+    ge("devil").onclick = function(){ socketSend({cmd:"devil"}) }
+    ge("goto").onclick = function(){ socketSend({cmd:"goto",value:ge('gotovalue').value}) }
 
     ge("cleardebug").onclick = function(){ ge("dbg").innerHTML='' }
 
@@ -160,6 +172,8 @@
   <body id="body" onload="onBodyLoad()">
     <div class="button" id="ledbutton">LED Toggle</div>
     <div class="button" id="motorhome">Motor Home</div>
+    <div class="button" id="devil">Devil</div>
+    <div class="button" id="goto">Go To</div><input type="text" id="gotovalue" value=2000>
     <BR>
     <div class="button" id="motorspeed1">Motor Speed 1</div>
     <div class="button" id="motorspeed2">Motor Speed 2</div>
