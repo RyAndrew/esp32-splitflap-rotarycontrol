@@ -1,9 +1,14 @@
 <!DOCTYPE html>
 <html>
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <head>
     <meta http-equiv="Content-type" content="text/html; charset=utf-8">
     <title>Flappy</title>
-    <style type="text/css" media="screen">
+    <style type="text/css">
+      body,html {
+      touch-action: pan-x pan-y;
+    }
     body {
       margin:10;
       padding:10;
@@ -153,7 +158,7 @@
     elcmd("motorspeed1");
     elcmd("motorspeed2");
     elcmd("motorspeed3");
-    
+
     elcmd("motorstep10");
     elcmd("motorstep20");
 
