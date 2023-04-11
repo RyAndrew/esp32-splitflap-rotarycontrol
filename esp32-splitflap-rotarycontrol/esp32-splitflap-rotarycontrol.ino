@@ -42,6 +42,9 @@ volatile long motorMoveDistance = 0;
 bool motorGoingHome = false;
 long motorDestination = 0;
 
+unsigned int rpmCheckRunningStep = 0;
+unsigned long rpmCheckStartTime = 0;
+
 hw_timer_t *Motor_timer = NULL;
 void IRAM_ATTR runMotor(){
 
@@ -96,6 +99,39 @@ static void hallHandler(uint8_t btnId, uint8_t btnState) {
       ws.textAll("Motor is Home!");
       motorMoveDistance = motorDestination;
       motorDestination = 0;
+      
+      switch(rpmCheckRunningStep){
+        case 1:
+          rpmCheckStartTime = millis();
+          motorhome(0);
+          rpmCheckRunningStep = 2;
+          break;
+        case 2:
+          rpmCheckRunningStep = 0;
+          unsigned long elapsed = millis() - rpmCheckStartTime;
+          unsigned long rpm = 60 / (elapsed / 1000);
+          
+          const int capacity = JSON_OBJECT_SIZE(20);
+          StaticJsonDocument<capacity> json;
+    
+          char rptText[25];
+          sprintf(rptText, "Motor Rotation Time %d", elapsed);
+          json["time"] = elapsed;
+          
+          char rpmText[25];
+          sprintf(rpmText, "Motor Rotation RPM %d", rpm);
+          json["rpm"] = rpm;
+          
+          ws.textAll(rptText);
+          ws.textAll(rpmText);
+          
+          char jsonOutput[128];
+          serializeJson(json, jsonOutput);
+          Serial.println(jsonOutput);
+          ws.textAll(jsonOutput);
+          break;
+      }
+      
     }
   } else {
     ws.textAll("Released Hall Sensor!");
@@ -168,7 +204,6 @@ void handleClientJsonData(String data){
       return;
     }
     
-    
     if(cmdString == "goto"){
       JsonVariant jsonValue = decodedJson["value"];
       if (jsonValue.isNull()){
@@ -181,8 +216,28 @@ void handleClientJsonData(String data){
       motorhome(destinationValue);
       return;
     }
+    if(cmdString == "movesteps"){
+      JsonVariant jsonValue = decodedJson["value"];
+      if (jsonValue.isNull()){
+        Serial.println("movesteps value not found");
+        return;
+      }
+      int steps = jsonValue.as<unsigned int>();
+      Serial.print("movesteps ");
+      Serial.println(steps);
+      motorMoveDistance = steps;
+      return;
+    }
+    if(cmdString == "rpmcheck"){
+      rpmcheck();
+      return;
+    }
 }
 
+void rpmcheck(){
+  rpmCheckRunningStep = 1;
+  motorhome(0);
+}
 
 void onEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventType type, void * arg, uint8_t *data, size_t len){
   if(type == WS_EVT_CONNECT){
@@ -214,7 +269,10 @@ void onEvent(AsyncWebSocket * server, AsyncWebSocketClient * client, AwsEventTyp
         for(size_t i=0; i < info->len; i++){
           Serial.printf("%02x ", data[i]);
         }
-        Serial.printf("\n");
+        msg = String((char *)data);
+        Serial.print("\n");
+        Serial.print(msg);
+        Serial.print("\n");
       }
       if(info->opcode == WS_TEXT){
         //client->text("I got your text message");
@@ -348,7 +406,7 @@ void InitOta( ) {
   //ArduinoOTA.setPort(3232);
 
   // Hostname defaults to esp3232-[MAC]
-  //ArduinoOTA.setHostname("esp32");
+  ArduinoOTA.setHostname("tarotthing");
 
   // No authentication by default
   //ArduinoOTA.setPassword("password");

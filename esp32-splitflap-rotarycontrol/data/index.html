@@ -24,7 +24,7 @@
       padding:0;
       padding-left:4px;
     }
-    input#gotovalue {
+    input.valueinput {
       border: 2px solid black;
       border-radius: 8px;
       height: 35px;
@@ -126,13 +126,13 @@
         }
         addMessage(msg);
       };
-      ge("input_el").onkeydown = function(e){
-        stb();
-        if(e.keyCode == 13 && ge("input_el").value != ""){
-          ws.send(ge("input_el").value);
-          ge("input_el").value = "";
-        }
-      }
+      // ge("input_el").onkeydown = function(e){
+      //   stb();
+      //   if(e.keyCode == 13 && ge("input_el").value != ""){
+      //     ws.send(ge("input_el").value);
+      //     ge("input_el").value = "";
+      //   }
+      // }
     }
   function socketSend(obj){
     ws.send(JSON.stringify(obj))
@@ -145,24 +145,26 @@
 		}
     */
 
-    var ledbutton = ge("ledbutton");
-    ledbutton.onclick = function(){ socketSend({cmd:"ledtoggle"}) }
+    elcmd("ledtoggle");
+    elcmd("motorhome");
+    elcmd("devil");
 
-    ge("motorspeed1").onclick = function(){ socketSend({cmd:"motorspeed1"}) }
-    ge("motorspeed2").onclick = function(){ socketSend({cmd:"motorspeed2"}) }
-    ge("motorspeed3").onclick = function(){ socketSend({cmd:"motorspeed3"}) }
+    elcmd("rpmcheck");
+    elcmd("motorspeed1");
+    elcmd("motorspeed2");
+    elcmd("motorspeed3");
+    
+    elcmd("motorstep10");
+    elcmd("motorstep20");
 
-    ge("motorstep10").onclick = function(){ socketSend({cmd:"motorstep10"}) }
-    ge("motorstep20").onclick = function(){ socketSend({cmd:"motorstep20"}) }
+    ge("goto").addEventListener('click', e => { socketSend({cmd:"goto",value:ge('gotovalue').value}) });
+    ge("movesteps").addEventListener('click', e => { socketSend({cmd:"movesteps",value:ge('movestepsvalue').value}) });
 
-    ge("motorhome").onclick = function(){ socketSend({cmd:"motorhome"}) }
-
-    ge("devil").onclick = function(){ socketSend({cmd:"devil"}) }
-    ge("goto").onclick = function(){ socketSend({cmd:"goto",value:ge('gotovalue').value}) }
-
-    ge("cleardebug").onclick = function(){ ge("dbg").innerHTML='' }
-
+    ge("cleardebug").addEventListener('click', e => { ge("dbg").innerHTML='' });
 	}
+    function elcmd(command){
+      ge(command).addEventListener('click', e => { socketSend({cmd:command}) });
+    }
     function onBodyLoad(){
       startSocket();
       addListeners();
@@ -170,22 +172,21 @@
     </script>
   </head>
   <body id="body" onload="onBodyLoad()">
-    <div class="button" id="ledbutton">LED Toggle</div>
+    <div class="button" id="ledtoggle">LED Toggle</div>
     <div class="button" id="motorhome">Motor Home</div>
     <div class="button" id="devil">Devil</div>
-    <div class="button" id="goto">Go To</div><input type="text" id="gotovalue" value=2000>
+    <div class="button" id="goto">Go To</div><input type="text" class="valueinput" id="gotovalue" value=2000>
     <BR>
+    <div class="button" id="rpmcheck">RPM Check</div>
     <div class="button" id="motorspeed1">Motor Speed 1</div>
     <div class="button" id="motorspeed2">Motor Speed 2</div>
     <div class="button" id="motorspeed3">Motor Speed 3</div>
     <BR>
     <div class="button" id="motorstep10">Motor Step 10</div>
     <div class="button" id="motorstep20">Motor Step 20</div>
+    <div class="button" id="movesteps">Move Steps</div><input type="text" class="valueinput" id="movestepsvalue" value=97>
     <BR>
-    <div id="input_div">
-v2 <input type="text" value="" id="input_el">
-    </div>
-    <div class="clearbutton" id="cleardebug">Clear</div>
+    <div class="clearbutton" id="cleardebug">Clear Log</div>
     <pre id="dbg"></pre>
   </body>
 </html>
