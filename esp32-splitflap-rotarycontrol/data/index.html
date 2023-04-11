@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8">
+    <title>Flappy</title>
+    <style type="text/css" media="screen">
+    body {
+      margin:10;
+      padding:10;
+      font-family: sans-serif;
+    }
+    #dbg {
+      overflow: scroll;
+      height: 400px;
+    }
+    #dbg, #input_div, #input_el {
+      font-size: 12px;
+      line-height: 13px;
+      color: #AAA;
+    }
+
+    #dbg, #input_div {
+      margin:0;
+      padding:0;
+      padding-left:4px;
+    }
+
+    #input_el {
+      width:98%;
+      border: 2px solid black;
+    }
+    #input_el:focus {
+      /*outline: none;*/
+    }
+    div.clearbutton {
+      background-color: #bbb;
+      color: #000;
+      border-radius: 8px;
+      padding: 2px;
+      margin: 2px;
+      border: 2px solid black;
+      display: inline-block;
+      font-weight: bolder;
+      user-select: none;
+    }
+    div.button {
+      background-color: #bbb;
+      color: #000;
+      border-radius: 8px;
+      padding: 10px;
+      margin: 5px;
+      border: 2px solid black;
+      display: inline-block;
+      font-weight: bolder;
+      user-select: none;
+    }
+    div.button:hover {
+      cursor: pointer;
+      background-color: #000;
+      color: #bbb;
+    }
+    div.button:active  {
+      background-color: #fff;
+      color: #000;
+    }
+    .target{
+    	width: 100px;
+    	height: 100px;
+    	padding: 10px;
+    	border: 2px solid black;
+    	display: inline-block;
+    }
+    </style>
+    <script type="text/javascript">
+    var ws = null;
+    function ge(s){ return document.getElementById(s);}
+    function ce(s){ return document.createElement(s);}
+    function stb(){ 
+      //window.scrollTo(0, document.body.scrollHeight || document.documentElement.scrollHeight); 
+      let dbg = ge("dbg");
+      dbg.scrollTop = dbg.scrollHeight;
+    }
+    function sendBlob(str){
+      var buf = new Uint8Array(str.length);
+      for (var i = 0; i < str.length; ++i) buf[i] = str.charCodeAt(i);
+        ws.send(buf);
+    }
+    function addMessage(m){
+      var msg = ce("div");
+      msg.innerText = m;
+      ge("dbg").appendChild(msg);
+      stb();
+    }
+    function startSocket(){
+      ws = new WebSocket('ws://'+document.location.host+'/ws');
+      ws.binaryType = "arraybuffer";
+      ws.onopen = function(e){
+        addMessage("Connected");
+      };
+      ws.onclose = function(e){
+        addMessage("Disconnected");
+        setTimeout(startSocket,5);
+      };
+      ws.onerror = function(e){
+        console.log("ws error", e);
+        addMessage("Error");
+      };
+      ws.onmessage = function(e){
+        var msg = "";
+        if(e.data instanceof ArrayBuffer){
+          msg = "BIN:";
+          var bytes = new Uint8Array(e.data);
+          for (var i = 0; i < bytes.length; i++) {
+            msg += String.fromCharCode(bytes[i]);
+          }
+        } else {
+          msg = "TXT:"+e.data;
+          console.log(e.data);
+        }
+        addMessage(msg);
+      };
+      ge("input_el").onkeydown = function(e){
+        stb();
+        if(e.keyCode == 13 && ge("input_el").value != ""){
+          ws.send(ge("input_el").value);
+          ge("input_el").value = "";
+        }
+      }
+    }
+  function socketSend(obj){
+    ws.send(JSON.stringify(obj))
+  }
+	function addListeners(){
+    /*
+		var modeSel = ge("mode");
+		modeSel.onchange = function(){
+			ws.send('{"cmd":"mode","value":"'+modeSel.value+'"}');
+		}
+    */
+
+    var ledbutton = ge("ledbutton");
+    ledbutton.onclick = function(){ socketSend({cmd:"ledtoggle"}) }
+
+    ge("motorspeed1").onclick = function(){ socketSend({cmd:"motorspeed1"}) }
+    ge("motorspeed2").onclick = function(){ socketSend({cmd:"motorspeed2"}) }
+    ge("motorspeed3").onclick = function(){ socketSend({cmd:"motorspeed3"}) }
+    ge("motorstep10").onclick = function(){ socketSend({cmd:"motorstep10"}) }
+    ge("motorstep20").onclick = function(){ socketSend({cmd:"motorstep20"}) }
+    ge("motorhome").onclick = function(){ socketSend({cmd:"motorhome"}) }
+
+    ge("cleardebug").onclick = function(){ ge("dbg").innerHTML='' }
+
+	}
+    function onBodyLoad(){
+      startSocket();
+      addListeners();
+    }
+    </script>
+  </head>
+  <body id="body" onload="onBodyLoad()">
+    <div class="button" id="ledbutton">LED Toggle</div>
+    <div class="button" id="motorhome">Motor Home</div>
+    <BR>
+    <div class="button" id="motorspeed1">Motor Speed 1</div>
+    <div class="button" id="motorspeed2">Motor Speed 2</div>
+    <div class="button" id="motorspeed3">Motor Speed 3</div>
+    <BR>
+    <div class="button" id="motorstep10">Motor Step 10</div>
+    <div class="button" id="motorstep20">Motor Step 20</div>
+    <BR>
+    <div id="input_div">
+v2 <input type="text" value="" id="input_el">
+    </div>
+    <div class="clearbutton" id="cleardebug">Clear</div>
+    <pre id="dbg"></pre>
+  </body>
+</html>
