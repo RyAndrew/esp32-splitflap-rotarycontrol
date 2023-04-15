@@ -164,6 +164,7 @@
 
     ge("goto").addEventListener('click', e => { socketSend({cmd:"goto",value:ge('gotovalue').value}) });
     ge("movesteps").addEventListener('click', e => { socketSend({cmd:"movesteps",value:ge('movestepsvalue').value}) });
+    ge("stop").addEventListener('click', e => { socketSend({cmd:"movesteps",value:0}) });
 
     ge("cleardebug").addEventListener('click', e => { ge("dbg").innerHTML='' });
 	}
@@ -183,6 +184,7 @@
     <div class="button" id="goto">Go To</div><input type="text" class="valueinput" id="gotovalue" value=2000>
     <BR>
     <div class="button" id="rpmcheck">RPM Check</div>
+    <div class="button" id="stop">Stop</div>
     <div class="button" id="motorspeed1">Motor Speed 1</div>
     <div class="button" id="motorspeed2">Motor Speed 2</div>
     <div class="button" id="motorspeed3">Motor Speed 3</div>
@@ -190,6 +192,7 @@
     <div class="button" id="motorstep10">Motor Step 10</div>
     <div class="button" id="motorstep20">Motor Step 20</div>
     <div class="button" id="movesteps">Move Steps</div><input type="text" class="valueinput" id="movestepsvalue" value=97>
+    <BR>
     <BR>
     <div class="clearbutton" id="cleardebug">Clear Log</div>
     <pre id="dbg"></pre>
