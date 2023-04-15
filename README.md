@@ -14,6 +14,8 @@
 # Uploading
 * Using Arduino IDE v1.8.19 to make LITTLEFS and ESP32 OTA updates a little easier
 * * https://randomnerdtutorials.com/esp32-ota-over-the-air-arduino/
+* * https://github.com/earlephilhower/mklittlefs
+* * * https://randomnerdtutorials.com/install-esp8266-nodemcu-littlefs-arduino/
 
 # Wiring Diagram
 ![Fritzing Wiring Diagram](readme-images/split-flap-rotary-encoder-fritzing.png)
