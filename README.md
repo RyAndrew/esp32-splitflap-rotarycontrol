@@ -2,8 +2,9 @@
 * Split-Flap Display Prototype Controlled by ESP32 and a Rotary Encoder
 
 
+
 * This is custom software for this 3d printed split flap display:
-** https://github.com/Dave19171/split-flap
+* * https://github.com/Dave19171/split-flap
 
 ![assembled-splitflap-rotary-encoder](readme-images/assembled-splitflap-rotary-encoder.jpg)
 
