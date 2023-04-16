@@ -5,6 +5,8 @@
 
 * This is custom software for this 3d printed split flap display:
 * * https://github.com/Dave19171/split-flap
+* Inspired by:
+* * https://github.com/scottbez1/splitflap
 
 ![assembled-splitflap-rotary-encoder](readme-images/assembled-splitflap-rotary-encoder.jpg)
 
