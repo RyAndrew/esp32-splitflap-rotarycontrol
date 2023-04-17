@@ -27,7 +27,7 @@
 #define MOTOR_STEP_PIN 13
 
 const int MOTOR_INCREMENT = 30;
-const int MOTOR_STEP_TIMER = 950;
+const int MOTOR_STEP_TIMER = 1000;
 
 RotaryEncoder *encoder = nullptr;
 
@@ -200,7 +200,7 @@ void handleClientJsonData(String data){
       return;
     }
     if(cmdString == "devil"){
-      motorhome(540);
+      motorhome(44 * 5);
       return;
     }
     
@@ -232,8 +232,18 @@ void handleClientJsonData(String data){
       rpmcheck();
       return;
     }
+    if(cmdString == "stop"){
+      stopMotor();
+      return;
+    }
 }
 
+void stopMotor(){
+  motorGoingHome = false;
+  rpmCheckRunningStep = 0;
+  motorMoveDistance = 0;
+  motorDestination = 0;
+}
 void rpmcheck(){
   rpmCheckRunningStep = 1;
   motorhome(0);

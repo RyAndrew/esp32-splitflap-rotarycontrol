@@ -164,7 +164,7 @@
 
     ge("goto").addEventListener('click', e => { socketSend({cmd:"goto",value:ge('gotovalue').value}) });
     ge("movesteps").addEventListener('click', e => { socketSend({cmd:"movesteps",value:ge('movestepsvalue').value}) });
-    ge("stop").addEventListener('click', e => { socketSend({cmd:"movesteps",value:0}) });
+    ge("stop").addEventListener('click', e => { socketSend({cmd:"stop"}) });
 
     ge("cleardebug").addEventListener('click', e => { ge("dbg").innerHTML='' });
 	}
