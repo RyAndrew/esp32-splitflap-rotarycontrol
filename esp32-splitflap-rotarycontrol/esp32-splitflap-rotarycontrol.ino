@@ -27,7 +27,8 @@
 #define MOTOR_STEP_PIN 13
 
 const int MOTOR_INCREMENT = 30;
-const int MOTOR_STEP_TIMER = 1000;
+const int MOTOR_SPEED_INITIAL = 1000;
+int MOTOR_SPEED = MOTOR_SPEED_INITIAL;
 
 RotaryEncoder *encoder = nullptr;
 
@@ -183,18 +184,6 @@ void handleClientJsonData(String data){
       motorMoveDistance += 20;
       return;
     }
-    if(cmdString == "motorspeed1"){
-      motorspeed1();
-      return;
-    }
-    if(cmdString == "motorspeed2"){
-      motorspeed2();
-      return;
-    }
-    if(cmdString == "motorspeed3"){
-      motorspeed3();
-      return;
-    }
     if(cmdString == "motorhome"){
       motorhome(0);
       return;
@@ -226,6 +215,19 @@ void handleClientJsonData(String data){
       Serial.print("movesteps ");
       Serial.println(steps);
       motorMoveDistance = steps;
+      return;
+    }
+    if(cmdString == "speedinc"){
+      motorspeedAdd(10);
+      return;
+    }
+    if(cmdString == "speeddec"){
+      motorspeedAdd(-10);
+      return;
+    }
+    if(cmdString == "speedreset"){
+      MOTOR_SPEED = MOTOR_SPEED_INITIAL;
+      motorspeedAdd(0);
       return;
     }
     if(cmdString == "rpmcheck"){
@@ -393,19 +395,19 @@ void setup() {
 
   Motor_timer = timerBegin(0, 80, true);
   timerAttachInterrupt(Motor_timer, &runMotor, true);
-  timerAlarmWrite(Motor_timer, MOTOR_STEP_TIMER, true);
+  timerAlarmWrite(Motor_timer, MOTOR_SPEED_INITIAL, true);
   timerAlarmEnable(Motor_timer);
 }
 
-void motorspeed1( ) {
-  timerAlarmWrite(Motor_timer, MOTOR_STEP_TIMER, true);
+void motorspeedAdd(int motorSpeedChange) {
+  MOTOR_SPEED = MOTOR_SPEED + motorSpeedChange;
+  timerAlarmWrite(Motor_timer, MOTOR_SPEED, true);
+
+  char speedText[25];
+  sprintf(speedText, "Motor Speed %d", MOTOR_SPEED);
+  ws.textAll(speedText);
 }
-void motorspeed2( ) {
-  timerAlarmWrite(Motor_timer, MOTOR_STEP_TIMER - 50, true);
-}
-void motorspeed3( ) {
-  timerAlarmWrite(Motor_timer, MOTOR_STEP_TIMER - 100, true);
-}
+
 void motorhome(long destination) {
   motorDestination=destination;
   motorGoingHome=true;
@@ -469,7 +471,7 @@ void loop() {
   if(motorGoingHome){
     motorMoveDistance = 100;
   }
-  
+    
   int newPos = encoder->getPosition();
   if (pos != newPos && newPos != 0) {
     RotaryEncoder::Direction dir = encoder->getDirection();
@@ -482,13 +484,17 @@ void loop() {
 
     pos = newPos;
     if(dir == RotaryEncoder::Direction::COUNTERCLOCKWISE){
-      motorMoveDistance += (-1 * MOTOR_INCREMENT);
-      // Serial.println("Turning CCW");
+      //motorMoveDistance += (-1 * MOTOR_INCREMENT);
+      //Serial.println("Turning CCW");
       ws.textAll("Turning CCW");
+      motorspeedAdd(-10);
     }else{
-      motorMoveDistance += MOTOR_INCREMENT;
-      // Serial.println("Turning CW");
+      //motorMoveDistance += MOTOR_INCREMENT;
+      
+      //Serial.println("Turning CW");
       ws.textAll("Turning CW");
+      motorspeedAdd(10);
+      
     }
     // Serial.printf("mMD = %ld\r\n", motorMoveDistance );
     digitalWrite(LED,HIGH);
