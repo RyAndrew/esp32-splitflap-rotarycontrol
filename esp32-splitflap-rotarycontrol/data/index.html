@@ -125,13 +125,13 @@
       ws.onmessage = function(e){
         var msg = "";
         if(e.data instanceof ArrayBuffer){
-          msg = "BIN:";
+          msg = "BINARY:";
           var bytes = new Uint8Array(e.data);
           for (var i = 0; i < bytes.length; i++) {
             msg += String.fromCharCode(bytes[i]);
           }
         } else {
-          msg = "TXT:"+e.data;
+          msg = e.data;
           console.log(e.data);
         }
         addMessage(msg);
